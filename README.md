@@ -107,8 +107,8 @@ Repository update rules
 Git and environment rules
 - Work in this repository root.
 - Before network operations, export:
-  - HTTP_PROXY=http://proxy.ims.intel.com:911
-  - HTTPS_PROXY=http://proxy.ims.intel.com:911
+  - HTTP_PROXY=http://proxy-shz.intel.com:911
+  - HTTPS_PROXY=http://proxy-shz.intel.com:911
   - NO_PROXY=localhost,127.0.0.1,.local,192.168.*,*.intel.com
 - Use git over SSH with:
   - GIT_SSH_COMMAND='ssh -F /opt/data/home/.ssh/config'
