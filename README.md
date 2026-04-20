@@ -33,6 +33,11 @@ News digest requirements
   - Anthropic
   - Google / Google DeepMind
   - Hugging Face
+  - Meta AI
+  - xAI
+  - Mistral AI
+  - NVIDIA AI
+  - Microsoft Research / Azure AI
   - TechCrunch AI
   - The Verge AI
 - Prefer important items from roughly the last 1-3 days.

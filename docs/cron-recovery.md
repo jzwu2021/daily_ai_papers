@@ -50,6 +50,11 @@ Use:
   - Anthropic
   - Google / Google DeepMind
   - Hugging Face
+  - Meta AI
+  - xAI
+  - Mistral AI
+  - NVIDIA AI
+  - Microsoft Research / Azure AI
   - TechCrunch AI
   - The Verge AI
 - Prefer important items from roughly the last 1-3 days.
@@ -162,7 +167,7 @@ Date and paths
 
 News digest requirements
 - Create 5-8 high-signal AI news items.
-- Prefer reputable live sources such as OpenAI, Anthropic, Google / Google DeepMind, Hugging Face, TechCrunch AI, and The Verge AI.
+- Prefer reputable live sources such as OpenAI, Anthropic, Google / Google DeepMind, Hugging Face, Meta AI, xAI, Mistral AI, NVIDIA AI, Microsoft Research / Azure AI, TechCrunch AI, and The Verge AI.
 - Prefer important items from roughly the last 1-3 days.
 - Focus on meaningful launches, model releases, tooling updates, research-product announcements, infrastructure, safety, agents, robotics, or ecosystem moves.
 
