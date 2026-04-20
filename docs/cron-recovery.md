@@ -108,8 +108,8 @@ Use:
 
 ## Git and environment requirements
 Before network operations, export:
-- `HTTP_PROXY=http://proxy-shz.intel.com:911`
-- `HTTPS_PROXY=http://proxy-shz.intel.com:911`
+- `HTTP_PROXY=http://proxy.ims.intel.com:911`
+- `HTTPS_PROXY=http://proxy.ims.intel.com:911`
 - `NO_PROXY=localhost,127.0.0.1,.local,192.168.*,*.intel.com`
 
 Use git over SSH with:
@@ -134,7 +134,8 @@ Use the following command shape to recreate the scheduled task from Hermes:
   "action": "create",
   "name": "daily-ai-news-papers-digest",
   "schedule": "0 0 * * *",
-  "deliver": "origin",
+  "deliver": "local",
+  "model": {"provider": "copilot", "model": "gpt-5.4"},
   "prompt": "Work in repository /opt/data/home/daily_ai_papers. For the current Asia/Shanghai date, generate one AI news digest and one AI papers digest, write them to news/$YEAR/$MONTH/$DATE.md and papers/$YEAR/$MONTH/$DATE.md, update README.md Latest, commit with message docs: add $DATE AI news and papers digest, and push to origin main. Use the formatting and quality requirements documented in README.md and docs/cron-recovery.md.",
   "repeat": 0
 }
@@ -192,8 +193,8 @@ Repository update rules
 
 Git and environment rules
 - Before network operations, export:
-  - HTTP_PROXY=http://proxy-shz.intel.com:911
-  - HTTPS_PROXY=http://proxy-shz.intel.com:911
+  - HTTP_PROXY=http://proxy.ims.intel.com:911
+  - HTTPS_PROXY=http://proxy.ims.intel.com:911
   - NO_PROXY=localhost,127.0.0.1,.local,192.168.*,*.intel.com
 - Use git over SSH with:
   - GIT_SSH_COMMAND='ssh -F /opt/data/home/.ssh/config'
