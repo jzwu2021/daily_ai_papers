@@ -1,257 +1,193 @@
 # Cron Task Recovery
 
-This file documents the scheduled tasks and the operational details needed to recreate them if the Hermes runtime state is lost.
+This file records the current Hermes scheduled tasks for this repo and how to recreate them if Hermes runtime state is lost.
 
 ## Source of truth
 
-This recovery document is based on:
-- the repository task description in `README.md`
-- recorded Hermes cron runs and prior session history
-- the currently known production job configuration recovered from session logs
+This document is based on:
+- `README.md`
+- current cron state in `/opt/data/cron/jobs.json`
+- successful and failed cron run artifacts under `/opt/data/sessions/` and `/opt/data/cron/output/`
 
-## Active scheduled task
+## Active scheduled tasks
 
-### 1. daily-ai-news-papers-digest
+### 1. `daily-ai-news-papers-digest`
 
 **Purpose**
 - Generate one daily AI news digest and one daily AI papers digest.
 - Use the Asia/Shanghai calendar day as the date basis.
-- Commit the generated markdown files into this repository and push to `origin/main`.
+- Write the files into this repo, update `README.md`, commit, and push.
 
-**Current known schedule**
-- Cron expression: `0 0 * * *`
+**Current known configuration**
+- Job id: `cdc68a300119`
+- Schedule: `0 0 * * *`
 - Intended wall-clock meaning: `08:00 Asia/Shanghai`
-- Reason: the Hermes scheduler in this environment was observed to interpret cron expressions in UTC, so `00:00 UTC` corresponds to `08:00 Asia/Shanghai`.
+- Model/provider: `copilot` + `gpt-5.4`
+- Delivery target: `slack:C0AUJ44J97W`
+- Skills:
+  - `daily-ai-digest-repo`
+  - `arxiv`
+  - `github-repo-management`
 
-**Known current job metadata**
-- Name: `daily-ai-news-papers-digest`
-- Replacement job id used previously: `cdc68a300119`
-- Historical broken job id (do not reuse): `fa9b4abafa2b`
+> Job IDs are runtime artifacts. Hermes will assign a new id when recreated.
 
-> Job IDs are runtime artifacts. When recreating the task, Hermes will assign a new job id automatically.
+### 2. `A股优秀管理层专题季度复盘提醒`
+
+**Purpose**
+- Remind Johnson to review the `topics/a-share-management/` topic in this repo.
+- Check the latest file under `topics/a-share-management/治理评价/`.
+- Create a new same-day governance review file.
+- Update `topics/a-share-management/TODO.md` with the next quarterly review item.
+- Report the reminder result back to Slack.
+
+**Current known configuration**
+- Job id: `b6e5475d01d7`
+- Current schedule: `once at 2026-07-20 09:00`
+- Intended timezone: `Asia/Shanghai`
+- Model/provider: `copilot` + `gpt-5.4`
+- Delivery target: `slack:C0AUJ44J97W`
+- Skills: none
+
+> This task is currently configured as a one-shot reminder, not a recurring quarterly cron expression.
 
 ## Exact task intent
 
-### Output files
-For the current Shanghai date:
+### Daily digest outputs
+For the current Shanghai date, write:
 - `news/YYYY/MM/YYYY-MM-DD.md`
 - `papers/YYYY/MM/YYYY-MM-DD.md`
 
-### Date calculation
 Use:
 - `DATE=$(TZ=Asia/Shanghai date +%F)`
 - `YEAR=$(TZ=Asia/Shanghai date +%Y)`
 - `MONTH=$(TZ=Asia/Shanghai date +%m)`
 
-### News digest requirements
-- Create 5-8 high-signal AI news items.
-- Prefer reputable live sources such as:
-  - OpenAI
-  - Anthropic
-  - Google / Google DeepMind
-  - Hugging Face
-  - Meta AI
-  - xAI
-  - Mistral AI
-  - NVIDIA AI
-  - Microsoft Research / Azure AI
-  - TechCrunch AI
-  - The Verge AI
-- Prefer important items from roughly the last 1-3 days.
-- Focus on launches, model releases, tooling updates, research-product announcements, infrastructure, safety, agents, robotics, and ecosystem moves.
-
-### Papers digest requirements
-- Create 6-10 notable recent arXiv papers.
-- Prefer papers from roughly the last 1-3 days.
-- Focus on:
-  - LLMs
-  - reasoning
-  - agents
-  - multimodal systems
-  - vision
-  - audio
-  - robotics
-  - inference
-  - benchmarks
-  - safety / alignment
-- Avoid withdrawn papers if detectable.
-
-## Required markdown format
-
-### News file
-- Title: `# AI News Digest — $DATE`
-- Subtitle: `Curated from recent live sources.`
-- Section order:
-  - `## Overview`
-  - `## News`
-  - `## Themes`
-- Each item under `## News` must be:
-  - `### N. <headline>`
-  - `Date: <YYYY-MM-DD>`
-  - `Source: <source>`
-  - `URL: <url>`
-  - `Summary: <2-3 sentence explanation of why it matters>`
-
-### Papers file
-- Title: `# AI Papers Digest — $DATE`
-- Subtitle: `Selected recent arXiv papers.`
-- Section order:
-  - `## Overview`
-  - `## Papers`
-  - `## Themes`
-- Each item under `## Papers` must be:
-  - `### N. <paper title>`
-  - `Date: <YYYY-MM-DD>`
-  - `URL: <arXiv url>`
-  - `Summary: <2-3 sentence explanation of why it matters>`
-
-## Repository update rules
-- Create parent directories as needed.
-- Overwrite the current day's files if they already exist.
-- Update the `Latest` section in `README.md` to point to the new files.
-- Keep the repository structure unchanged unless the layout itself changes.
-
-## Git and environment requirements
-Before network operations, use the environment's configured proxy settings if required.
-Do not store internal proxy endpoints in repository documentation.
-
-Use git over SSH with:
-- `GIT_SSH_COMMAND='ssh -F /opt/data/home/.ssh/config'`
-
-If repo-local git identity is missing, use:
-- `user.name=Hermes Agent`
-- `user.email=hermes-github@6739d394701d`
-
-## Commit behavior
-- Commit all changed files with message:
+### Daily digest content rules
+- News: 5-8 high-signal items from reputable recent sources.
+- Papers: 6-10 recent notable arXiv papers.
+- Keep the exact markdown structure documented in `README.md`.
+- Update `README.md` Latest links.
+- Commit with:
   - `docs: add $DATE AI news and papers digest`
 - Push to `origin main`.
-- If there are no content changes, report success without failing.
 
-## Hermes recreation command
+### A-share quarterly review reminder rules
+- Work in repo: `/opt/data/home/daily_ai_papers`
+- Focus path:
+  - `topics/a-share-management/`
+  - `topics/a-share-management/治理评价/`
+  - `topics/a-share-management/TODO.md`
+- Review the latest governance-evaluation file.
+- Create a new review file with the latest date.
+- Refresh TODO so the next quarterly review is scheduled.
+- Send a concise reminder/result message to Slack.
 
-Use the following command shape to recreate the scheduled task from Hermes:
+## Recovery prerequisites
+
+Before recreating either task:
+
+1. Verify repo exists and remote is correct:
+   ```bash
+   git -C /opt/data/home/daily_ai_papers remote -v
+   ```
+2. Verify Hermes can read cron state:
+   ```bash
+   stat /opt/data/cron/jobs.json /opt/data/config.yaml
+   ```
+3. Verify Hermes runtime user:
+   ```bash
+   whoami && id
+   ```
+4. If needed, verify recent session artifacts:
+   ```bash
+   ls -1t /opt/data/sessions/session_cron_* | head
+   ```
+
+## Hermes recreation commands
+
+### Recreate the daily digest job
 
 ```json
 {
   "action": "create",
   "name": "daily-ai-news-papers-digest",
   "schedule": "0 0 * * *",
-  "deliver": "local",
+  "deliver": "slack:C0AUJ44J97W",
   "model": {"provider": "copilot", "model": "gpt-5.4"},
-  "prompt": "Work in repository /opt/data/home/daily_ai_papers. For the current Asia/Shanghai date, generate one AI news digest and one AI papers digest, write them to news/$YEAR/$MONTH/$DATE.md and papers/$YEAR/$MONTH/$DATE.md, update README.md Latest, commit with message docs: add $DATE AI news and papers digest, and push to origin main. Use the formatting and quality requirements documented in README.md and docs/cron-recovery.md.",
-  "repeat": 0
+  "skills": ["daily-ai-digest-repo", "arxiv", "github-repo-management"],
+  "prompt": "Work in the GitHub repo at /opt/data/home/daily_ai_papers. Use Asia/Shanghai as the date basis. Write the daily digest files to news/$YEAR/$MONTH/$DATE.md and papers/$YEAR/$MONTH/$DATE.md, update README.md Latest, follow the exact formatting requirements in README.md and docs/cron-recovery.md, commit with message docs: add $DATE AI news and papers digest, and push to origin main. Use the environment's configured proxy settings if required, use git over SSH with ssh config at /opt/data/home/.ssh/config, and fall back to Python stdlib or Hermes web tools if curl or a source feed is unavailable." 
 }
 ```
 
-## Recommended recreation prompt
+### Recreate the A-share quarterly review reminder
 
-If you need a fuller self-contained prompt for Hermes cron creation, use this:
+Use the next intended quarterly review timestamp in Asia/Shanghai.
 
-```text
-Work in repository /opt/data/home/daily_ai_papers.
-
-Goal
-- Produce one AI news digest and one AI papers digest for the current day.
-- Use Asia/Shanghai as the date basis.
-- Keep formatting stable so the task can be reproduced consistently by an agent.
-
-Date and paths
-- Compute:
-  - DATE=$(TZ=Asia/Shanghai date +%F)
-  - YEAR=$(TZ=Asia/Shanghai date +%Y)
-  - MONTH=$(TZ=Asia/Shanghai date +%m)
-- Write files to:
-  - news/$YEAR/$MONTH/$DATE.md
-  - papers/$YEAR/$MONTH/$DATE.md
-
-News digest requirements
-- Create 5-8 high-signal AI news items.
-- Prefer reputable live sources such as OpenAI, Anthropic, Google / Google DeepMind, Hugging Face, Meta AI, xAI, Mistral AI, NVIDIA AI, Microsoft Research / Azure AI, TechCrunch AI, and The Verge AI.
-- Prefer important items from roughly the last 1-3 days.
-- Focus on meaningful launches, model releases, tooling updates, research-product announcements, infrastructure, safety, agents, robotics, or ecosystem moves.
-
-Papers digest requirements
-- Create 6-10 notable recent arXiv papers.
-- Prefer papers from roughly the last 1-3 days.
-- Focus on LLMs, reasoning, agents, multimodal systems, vision, audio, robotics, inference, benchmarks, and safety / alignment.
-- Avoid withdrawn papers if detectable.
-
-Required markdown format
-- News title line exactly: # AI News Digest — $DATE
-- News subtitle line exactly: Curated from recent live sources.
-- News sections in this order: ## Overview, ## News, ## Themes
-- Each news item must include title, date, source, URL, and a 2-3 sentence Summary.
-- Papers title line exactly: # AI Papers Digest — $DATE
-- Papers subtitle line exactly: Selected recent arXiv papers.
-- Papers sections in this order: ## Overview, ## Papers, ## Themes
-- Each paper item must include title, date, URL, and a 2-3 sentence Summary.
-- Overview sections should be 2-4 sentences.
-- Themes sections should contain 3-5 bullet points.
-
-Repository update rules
-- Create parent directories as needed.
-- Overwrite the current day's files if they already exist.
-- Update the Latest section in README.md.
-
-Git and environment rules
-- Before network operations, use the environment's configured proxy settings if required.
-- Do not store internal proxy endpoints in repository documentation.
-- Use git over SSH with:
-  - GIT_SSH_COMMAND='ssh -F /opt/data/home/.ssh/config'
-- If git user.name or user.email is not set in the repo, use Hermes Agent / hermes-github@6739d394701d.
-
-Commit behavior
-- Commit all changed files with message: docs: add $DATE AI news and papers digest
-- Push to origin main.
-- If there are no content changes, do not fail; report that nothing changed.
-
-Validation checklist
-- Confirm both files exist for the target date.
-- Confirm README Latest points to the same date.
-- Confirm git status is clean after commit.
-- Confirm push to origin main succeeded.
+```json
+{
+  "action": "create",
+  "name": "A股优秀管理层专题季度复盘提醒",
+  "schedule": "2026-07-20T09:00:00+08:00",
+  "repeat": 1,
+  "deliver": "slack:C0AUJ44J97W",
+  "model": {"provider": "copilot", "model": "gpt-5.4"},
+  "prompt": "提醒 Johnson：今天需要对 GitHub 仓库 daily_ai_papers 中 topics/a-share-management/ 这个专题做季度复盘。请检查 topics/a-share-management/治理评价/ 下最近一次评估文件，按最新日期新建一份当日治理评价文件，复核 A 股优秀管理层 Top50，重点关注治理、信披、IR、监管处罚、高管变动、资本配置与经营质量变化，并更新 topics/a-share-management/TODO.md 中下一次 3 个月后的复盘事项。最后向 Slack 汇报本次复盘提醒结果。"
+}
 ```
 
-## Operational pitfalls discovered
+## Slack delivery recovery notes
 
-### 1. Cron database permissions can prevent all jobs from running
-In this Hermes deployment, scheduled jobs failed when:
-- `/opt/data/cron/jobs.json` was owned by `root:root`
-- file mode was `600`
-- Hermes runtime user was `hermes`
+Current configured delivery target for both tasks:
+- `slack:C0AUJ44J97W`
 
-Symptom:
-- `cronjob list` / `cronjob create` fails with `Permission denied`
-- scheduled jobs never fire
+Important notes:
+- Prefer explicit Slack targets over `deliver=origin`.
+- If Slack delivery fails with `channel_not_found` or `not_in_channel`, verify that the bot is actually in the target channel.
+- If channel delivery remains unreliable, fall back to a known-good DM or thread target.
 
-Minimal fix:
-```bash
-sudo chown hermes:hermes /opt/data/cron/jobs.json
-sudo chmod 600 /opt/data/cron/jobs.json
-```
+## Validation after recreation
 
-### 2. Hermes config permissions matter too
-If `/opt/data/config.yaml` is unreadable to the `hermes` user, scheduler-related behavior may also fail.
+### Daily digest job
+1. `cronjob(action='list')` shows the recreated job.
+2. `cronjob(action='run', job_id=...)` succeeds.
+3. A new file appears under:
+   - `/opt/data/sessions/session_cron_<jobid>_*.json`
+4. A new output artifact appears under:
+   - `/opt/data/cron/output/<jobid>/`
+5. Repo files for the target date exist and `README.md` Latest is updated.
+6. Git push succeeds.
+7. Confirm Slack delivery in the target channel.
 
-Minimal fix:
-```bash
-sudo chown hermes:hermes /opt/data/config.yaml
-sudo chmod 600 /opt/data/config.yaml
-```
+### Quarterly reminder job
+1. `cronjob(action='list')` shows the recreated job.
+2. If using a one-shot schedule, confirm `next_run_at` matches the intended quarter date.
+3. For a manual test, run it once with `cronjob(action='run', job_id=...)`.
+4. Confirm the governance-evaluation file and `TODO.md` were updated as intended.
+5. Confirm Slack delivery in the target channel.
 
-### 3. Time drift can make cron appear late or broken
-This environment previously showed significant clock skew. Even with a correct cron expression, execution can still happen at the wrong real-world time if the host clock is wrong.
+## Operational pitfalls
+
+### 1. Cron permissions
+If `/opt/data/cron/jobs.json` is unreadable by the Hermes runtime user, jobs may not list or run correctly.
+
+### 2. Config permissions
+If `/opt/data/config.yaml` is unreadable, scheduler/runtime behavior can break.
+
+### 3. Job-level provider/model drift
+Do not assume old jobs inherit the current default model. If a recovered job shows null provider/model, set them explicitly.
+
+### 4. Slack delivery errors can be delivery-only
+A task may execute successfully but still fail at the final Slack send step. Check session files and output artifacts separately from delivery logs.
+
+### 5. Do not publish internal infrastructure details
+Keep repo docs generic. Say "use the environment's configured proxy settings if required" rather than storing internal proxy endpoints.
 
 ## Recovery checklist
-1. Restore this repository.
-2. Verify git SSH access works.
-3. Verify Hermes runs as the expected user.
-4. Verify `/opt/data/config.yaml` and `/opt/data/cron/jobs.json` are readable by that user.
-5. Recreate the `daily-ai-news-papers-digest` job with schedule `0 0 * * *`.
-6. Run a one-off manual test.
-7. Confirm the next scheduled run time is correct relative to UTC and Asia/Shanghai.
-
-## Notes
-- This repository currently contains one known production cron task description.
-- If more Hermes scheduled tasks are added later, append them to this file using the same format so the repository remains a durable recovery source.
+1. Restore the repo.
+2. Verify git SSH access.
+3. Verify Hermes cron/config permissions.
+4. Recreate both jobs with explicit model/provider and explicit Slack delivery target.
+5. Manually run both jobs once.
+6. Confirm session/output artifacts.
+7. Confirm message delivery in Slack.
+8. Update this document whenever job name, schedule, prompt, skills, or delivery target changes.
