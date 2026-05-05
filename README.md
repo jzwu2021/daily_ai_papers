@@ -7,8 +7,8 @@ Structure
 - papers/YYYY/MM/YYYY-MM-DD.md: daily AI papers digest
 
 Latest
-- news/2026/05/2026-05-05.md
-- papers/2026/05/2026-05-05.md
+- news/2026/05/2026-05-06.md
+- papers/2026/05/2026-05-06.md
 
 Task description
 
