@@ -5,6 +5,7 @@ Daily AI news and paper digests.
 Structure
 - news/YYYY/MM/YYYY-MM-DD.md: daily AI news digest
 - papers/YYYY/MM/YYYY-MM-DD.md: daily AI papers digest
+- docs/assistant-prompts/: versioned prompt files for assistant workflows
 
 Latest
 - news/2026/05/2026-05-07.md
