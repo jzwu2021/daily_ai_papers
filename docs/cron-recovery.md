@@ -34,7 +34,8 @@ This document is based on:
 
 **Purpose**
 - Every Saturday morning, summarize this week's daily digests.
-- Remind Johnson to submit next week's learning plan before 20:00 that night.
+- Send the weekly recap in Gordon's academic-coach style for Jerome.
+- Remind Jerome to submit next week's learning plan before 20:00 that night.
 
 **Current configuration**
 - Job id: `bb65e1abb2dd`
@@ -69,6 +70,8 @@ This workflow is implemented as **7 separate cron jobs**, one every 30 minutes f
 
 ### Daily digest task
 - Work in repo: `/opt/data/home/daily_ai_papers`
+- Before writing or summarizing for Slack, read:
+  - `docs/assistant-prompts/jerome-academic-coach.md`
 - Use Asia/Shanghai date basis:
   - `DATE=$(TZ=Asia/Shanghai date +%F)`
   - `YEAR=$(TZ=Asia/Shanghai date +%Y)`
@@ -81,15 +84,24 @@ This workflow is implemented as **7 separate cron jobs**, one every 30 minutes f
 - Commit with:
   - `docs: add $DATE AI news and papers digest`
 - Push to `origin main`
+- After the repo update, send a concise Gordon-style Slack note for Jerome with:
+  - a brief confirmation that the digest is ready
+  - 2-3 `今日 AI 观察` bullets
+  - one short `Gordon 提醒` linking an AI trend to a concrete study habit
 
 ### Weekly Saturday morning review
 - Work in repo: `/opt/data/home/daily_ai_papers`
 - Read this week's available daily digest files under:
   - `news/YYYY/MM/YYYY-MM-DD.md`
   - `papers/YYYY/MM/YYYY-MM-DD.md`
-- Produce a concise weekly review
-- Style should stay short, not verbose
-- Include a clear reminder that next week's learning plan should be sent before `20:00` that night
+- Read `docs/assistant-prompts/jerome-academic-coach.md` before drafting the Slack message
+- Produce a concise weekly review in Gordon's academic-coach tone for Jerome
+- Style should stay short, encouraging, and logically clear
+- Include:
+  - 3-5 bullet points on the week's AI learning/industry highlights
+  - a `Gordon 点评` section explaining what Jerome can learn from these trends
+  - a gentle reminder that next week's learning plan should be sent before `20:00` that night
+  - 2-3 starter questions to help Jerome write the plan
 
 ### Saturday evening reminder rule
 Current default detection rule:
@@ -98,7 +110,7 @@ Current default detection rule:
   - or a phrase matching `下周...规划`
 - then the system treats the learning plan as received
 
-If `PLAN_RECEIVED=false`, the reminder job sends the scheduled reminder message.
+If `PLAN_RECEIVED=false`, the reminder job sends a short Gordon-style prompt that lowers the writing barrier by offering concrete starter questions.
 If `PLAN_RECEIVED=true`, the reminder job sends only a short confirmation that the plan has already been received.
 
 ## Recovery prerequisites
@@ -122,13 +134,13 @@ whoami && id
 
 4. Verify helper script directory exists:
 ```bash
-mkdir -p ~/.hermes/scripts
+mkdir -p /opt/data/scripts
 ```
 
 ## Recovery helper script
 
 Create this file first:
-- `~/.hermes/scripts/check_learning_plan_submission.py`
+- `/opt/data/scripts/check_learning_plan_submission.py`
 
 Script content:
 
@@ -194,7 +206,7 @@ if matches:
 
 Recommended post-create step:
 ```bash
-chmod +x ~/.hermes/scripts/check_learning_plan_submission.py
+chmod +x /opt/data/scripts/check_learning_plan_submission.py
 ```
 
 ## Hermes recreation commands
@@ -209,7 +221,7 @@ chmod +x ~/.hermes/scripts/check_learning_plan_submission.py
   "deliver": "slack:C0AUJ44J97W",
   "model": {"provider": "copilot", "model": "gpt-5.4"},
   "skills": ["daily-ai-digest-repo", "arxiv", "github-repo-management"],
-  "prompt": "Work in the GitHub repo at /opt/data/home/daily_ai_papers. Use Asia/Shanghai as the date basis. Write the daily digest files to news/$YEAR/$MONTH/$DATE.md and papers/$YEAR/$MONTH/$DATE.md, update README.md Latest, follow the exact formatting requirements in README.md and docs/cron-recovery.md, commit with message docs: add $DATE AI news and papers digest, and push to origin main. Use the environment's configured proxy settings if required, use git over SSH with ssh config at /opt/data/home/.ssh/config, and fall back to Python stdlib or Hermes web tools if curl or a source feed is unavailable."
+  "prompt": "Work in the GitHub repo at /opt/data/home/daily_ai_papers. Before writing, read /opt/data/home/daily_ai_papers/README.md, /opt/data/home/daily_ai_papers/docs/cron-recovery.md, and /opt/data/home/daily_ai_papers/docs/assistant-prompts/jerome-academic-coach.md. Use Asia/Shanghai as the date basis. Write the daily digest files to news/$YEAR/$MONTH/$DATE.md and papers/$YEAR/$MONTH/$DATE.md, update README.md Latest, follow the exact formatting requirements in README.md and docs/cron-recovery.md, commit with message docs: add $DATE AI news and papers digest, and push to origin main. Use the environment's configured proxy settings if required, use git over SSH with ssh config at /opt/data/home/.ssh/config, and fall back to Python stdlib or Hermes web tools if curl or a source feed is unavailable. After the repo update, send a concise final Slack message in Gordon's style for Jerome: first confirm the digest is ready, then list 2-3 '今日 AI 观察' bullets based on the day's highest-signal items, then add one short 'Gordon 提醒' that connects one AI trend to a concrete study habit for a middle-school student. Tone: patient, encouraging, logical, not childish, not verbose."
 }
 ```
 
@@ -222,7 +234,7 @@ chmod +x ~/.hermes/scripts/check_learning_plan_submission.py
   "schedule": "0 9 * * 6",
   "deliver": "slack:C0AUJ44J97W",
   "model": {"provider": "copilot", "model": "gpt-5.4"},
-  "prompt": "今天是周六晨间周报时间。请在 GitHub 仓库 /opt/data/home/daily_ai_papers 中回顾本周日报内容，优先读取本周已有的 news/YYYY/MM/YYYY-MM-DD.md 与 papers/YYYY/MM/YYYY-MM-DD.md，整理一份简洁的本周回顾。输出要求：1) 先用 3-5 条 bullet 总结本周 AI 学习/行业重点；2) 再给出一个“今晚提醒”段落，明确提醒 Johnson 请在今晚 20:00 前输入下周学习规划；3) 风格简洁，不要太啰嗦；4) 最终直接发送到 Slack。"
+  "prompt": "今天是周六晨间周报时间。先读取 /opt/data/home/daily_ai_papers/docs/assistant-prompts/jerome-academic-coach.md 与 /opt/data/home/daily_ai_papers/docs/cron-recovery.md。再在 GitHub 仓库 /opt/data/home/daily_ai_papers 中回顾本周日报内容，优先读取本周已有的 news/YYYY/MM/YYYY-MM-DD.md 与 papers/YYYY/MM/YYYY-MM-DD.md。请以 Gordon 面向 Jerome 的风格输出一份简洁周报，要求：1) 标题可直接写“本周 AI 周报”；2) 用 3-5 条 bullet 总结本周最值得 Jerome 关注的 AI 学习/行业重点；3) 增加一个“Gordon 点评”小段，用中学生能懂的话解释这些变化对学习方法、思维方式或未来能力有什么启发；4) 增加一个“周计划提醒”小段，温和提醒 Jerome 在今晚 20:00 前发送下周学习规划，并给出 2-3 个引导问题帮助他开头；5) 风格耐心、鼓励、逻辑清晰、不要太啰嗦；6) 直接发送到 Slack。"
 }
 ```
 
@@ -243,7 +255,7 @@ Example for 20:00:
   "deliver": "slack:C0AUJ44J97W",
   "model": {"provider": "copilot", "model": "gpt-5.4"},
   "script": "check_learning_plan_submission.py",
-  "prompt": "你正在执行周六晚间学习规划提醒。先读取预运行脚本注入的上下文。如果上下文里显示 PLAN_RECEIVED=true，则输出一句简短确认：'已收到本周学习规划，今晚不再提醒。' 如果 PLAN_RECEIVED=false，则输出一句简短提醒：'提醒：今晚 20:00 前请发送下周学习规划。' 风格简洁。"
+  "prompt": "你正在执行周六晚间学习规划提醒。先读取预运行脚本注入的上下文，再遵循 /opt/data/home/daily_ai_papers/docs/assistant-prompts/jerome-academic-coach.md 的 Gordon 风格。如果上下文里显示 PLAN_RECEIVED=true，则只输出：Gordon 收到啦，本周学习规划已记下，今晚不再提醒。 如果 PLAN_RECEIVED=false，则只输出：Gordon 来提醒一下：如果下周学习规划还没写，可以先回这 3 个小问题：1. 下周最想补哪一科？2. 最容易卡住的题型是什么？3. 每天准备学多久？写几行发来就可以。"
 }
 ```
 
