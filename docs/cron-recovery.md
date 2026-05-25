@@ -8,7 +8,7 @@ This document is based on:
 - `README.md`
 - current cron state from `cronjob list`
 - `/opt/data/cron/jobs.json`
-- local helper script: `~/.hermes/scripts/check_learning_plan_submission.py`
+- local helper script: `/opt/data/scripts/check_learning_plan_submission.py`
 
 ## Active scheduled tasks
 
@@ -21,10 +21,10 @@ This document is based on:
 
 **Current configuration**
 - Job id: `cdc68a300119`
-- Schedule: `0 0 * * *`
-- Intended meaning: `08:00 Asia/Shanghai`
+- Schedule: `0 8 * * *`
+- Intended meaning: every day `08:00 Asia/Shanghai`
 - Model/provider: `copilot` + `gpt-5.4`
-- Delivery target: `slack:C0AUJ44J97W`
+- Delivery target: `slack:D0AS5H0LK70:1779144686.934649`
 - Skills:
   - `daily-ai-digest-repo`
   - `arxiv`
@@ -42,7 +42,7 @@ This document is based on:
 - Schedule: `0 9 * * 6`
 - Intended meaning: every Saturday `09:00 Asia/Shanghai`
 - Model/provider: `copilot` + `gpt-5.4`
-- Delivery target: `slack:C0AUJ44J97W`
+- Delivery target: `slack:D0AS5H0LK70:1779144686.934649`
 - Skills: none
 
 ### 3. Saturday evening learning-plan reminder chain
@@ -50,10 +50,10 @@ This document is based on:
 This workflow is implemented as **7 separate cron jobs**, one every 30 minutes from 20:00 to 23:00 on Saturdays.
 
 **Shared behavior**
-- Delivery target: `slack:C0AUJ44J97W`
+- Delivery target: `slack:D0AS5H0LK70:1779144686.934649`
 - Model/provider: `copilot` + `gpt-5.4`
 - Shared pre-run script: `check_learning_plan_submission.py`
-- Script path at runtime: `~/.hermes/scripts/check_learning_plan_submission.py`
+- Script path at runtime: `/opt/data/scripts/check_learning_plan_submission.py`
 
 **Current jobs**
 - `learning-plan-reminder-2000` — job id `d3f153b23a5c` — schedule `0 20 * * 6`
@@ -84,10 +84,16 @@ This workflow is implemented as **7 separate cron jobs**, one every 30 minutes f
 - Commit with:
   - `docs: add $DATE AI news and papers digest`
 - Push to `origin main`
-- After the repo update, send a concise Gordon-style Slack note for Jerome with:
-  - a brief confirmation that the digest is ready
-  - 2-3 `今日 AI 观察` bullets
-  - one short `Gordon 提醒` linking an AI trend to a concrete study habit
+- After the repo update, send a concise Chinese Slack morning reminder to the configured delivery target
+- First inspect yesterday's relevant Slack feedback/context; if nothing clear is recoverable, state `昨日暂无明确反馈`
+- Output exactly two sections: `昨日反馈` and `待完成事项`
+- `昨日反馈`: summarize 2-4 bullets of key feedback, progress, or decisions from yesterday
+- `待完成事项`: list up to 5 concrete unfinished items grounded in yesterday's feedback plus the current repo/task context
+- If multiple unfinished items are the same underlying task and prior similar reminders support it, merge them and annotate a historical reminder count like `此前已提醒×2` or `此前已提醒×3`; this is a prior-reminder count, not a today's completion count
+- Only show that count when supported by available history/context
+- If there are more than 3 items, keep the first 3 as core items and label the remaining final 1-2 items as `超额部分`
+- End with one short line asking the user to confirm or supplement, plus a brief encouraging note that includes one concise real quote from a well-known person
+- Prefer quotes with gentle philosophical reflection on life, time, solitude, character, choice, or human nature, and avoid preachy or didactic lines
 
 ### Weekly Saturday morning review
 - Work in repo: `/opt/data/home/daily_ai_papers`
@@ -217,11 +223,11 @@ chmod +x /opt/data/scripts/check_learning_plan_submission.py
 {
   "action": "create",
   "name": "daily-ai-news-papers-digest",
-  "schedule": "0 0 * * *",
-  "deliver": "slack:C0AUJ44J97W",
+  "schedule": "0 8 * * *",
+  "deliver": "slack:D0AS5H0LK70:1779144686.934649",
   "model": {"provider": "copilot", "model": "gpt-5.4"},
   "skills": ["daily-ai-digest-repo", "arxiv", "github-repo-management"],
-  "prompt": "Work in the GitHub repo at /opt/data/home/daily_ai_papers. Before writing, read /opt/data/home/daily_ai_papers/README.md, /opt/data/home/daily_ai_papers/docs/cron-recovery.md, and /opt/data/home/daily_ai_papers/docs/assistant-prompts/jerome-academic-coach.md. Use Asia/Shanghai as the date basis. Write the daily digest files to news/$YEAR/$MONTH/$DATE.md and papers/$YEAR/$MONTH/$DATE.md, update README.md Latest, follow the exact formatting requirements in README.md and docs/cron-recovery.md, commit with message docs: add $DATE AI news and papers digest, and push to origin main. Use the environment's configured proxy settings if required, use git over SSH with ssh config at /opt/data/home/.ssh/config, and fall back to Python stdlib or Hermes web tools if curl or a source feed is unavailable. After the repo update, send a concise final Slack message in Gordon's style for Jerome: first confirm the digest is ready, then list 2-3 '今日 AI 观察' bullets based on the day's highest-signal items, then add one short 'Gordon 提醒' that connects one AI trend to a concrete study habit for a middle-school student. Tone: patient, encouraging, logical, not childish, not verbose."
+  "prompt": "Work in the GitHub repo at /opt/data/home/daily_ai_papers. Before acting, read /opt/data/home/daily_ai_papers/README.md, /opt/data/home/daily_ai_papers/docs/cron-recovery.md, and /opt/data/home/daily_ai_papers/docs/assistant-prompts/jerome-academic-coach.md. Use Asia/Shanghai as the date basis. Write the daily digest files to news/$YEAR/$MONTH/$DATE.md and papers/$YEAR/$MONTH/$DATE.md, keeping the markdown schema exactly as required in README.md and without adding extra sections to those files. Update README.md Latest, commit with message docs: add $DATE AI news and papers digest, and push to origin main. Use the environment's configured proxy settings if required, use git over SSH with ssh config at /opt/data/home/.ssh/config, and fall back to Python stdlib or Hermes web tools if curl or a source feed is unavailable. After the repo update, send a concise Slack morning reminder in Chinese to the configured delivery target. First inspect yesterday's feedback from the relevant Slack context using available context/tools; if no clear feedback exists, state '昨日暂无明确反馈'. Then output exactly these two sections: '昨日反馈' and '待完成事项'. Under '昨日反馈', summarize 2-4 bullets of the user's key feedback, progress, or decisions from yesterday. Under '待完成事项', list up to 5 concrete unfinished items grounded in yesterday's feedback plus the current repo/task context, but apply these formatting rules: (1) if multiple unfinished items correspond to the same underlying task that has already appeared in previous similar reminders, merge them and annotate a historical reminder count such as '此前已提醒×2' or '此前已提醒×3'; this count means how many prior similar reminders mentioned this task before today, not how many times the task must be completed today; (2) only add this count when it is actually supported by available history/context; otherwise omit the count; (3) if there are more than 3 items total, treat the first 3 as the core items and explicitly label the remaining up to 2 items as '超额部分' within the same section, keeping them as the final items for the day. End with one short line that asks the user to confirm or supplement and also adds a brief encouraging note that includes one concise real quote from a well-known person (名人名言), preferably in Chinese or with a short Chinese translation. Prefer quotes with some philosophical reflection on life, time, solitude, character, choice, or human nature; keep the feeling gentle, thoughtful, and quietly persuasive rather than preachy or didactic. Avoid command-like slogans, heavy-handed success coaching, or lines that sound like moral instruction. Do not fabricate or misattribute quotes, and avoid repeating the exact same quote too frequently across consecutive days. Tone: concise, clear, actionable, not verbose."
 }
 ```
 
@@ -232,7 +238,7 @@ chmod +x /opt/data/scripts/check_learning_plan_submission.py
   "action": "create",
   "name": "weekly-learning-review",
   "schedule": "0 9 * * 6",
-  "deliver": "slack:C0AUJ44J97W",
+  "deliver": "slack:D0AS5H0LK70:1779144686.934649",
   "model": {"provider": "copilot", "model": "gpt-5.4"},
   "prompt": "今天是周六晨间周报时间。先读取 /opt/data/home/daily_ai_papers/docs/assistant-prompts/jerome-academic-coach.md 与 /opt/data/home/daily_ai_papers/docs/cron-recovery.md。再在 GitHub 仓库 /opt/data/home/daily_ai_papers 中回顾本周日报内容，优先读取本周已有的 news/YYYY/MM/YYYY-MM-DD.md 与 papers/YYYY/MM/YYYY-MM-DD.md。请以 Gordon 面向 Jerome 的风格输出一份简洁周报，要求：1) 标题可直接写“本周 AI 周报”；2) 用 3-5 条 bullet 总结本周最值得 Jerome 关注的 AI 学习/行业重点；3) 增加一个“Gordon 点评”小段，用中学生能懂的话解释这些变化对学习方法、思维方式或未来能力有什么启发；4) 增加一个“周计划提醒”小段，温和提醒 Jerome 在今晚 20:00 前发送下周学习规划，并给出 2-3 个引导问题帮助他开头；5) 风格耐心、鼓励、逻辑清晰、不要太啰嗦；6) 直接发送到 Slack。"
 }
@@ -242,7 +248,7 @@ chmod +x /opt/data/scripts/check_learning_plan_submission.py
 
 Restore these 7 jobs using the same model/provider and delivery target, all with:
 - `script: "check_learning_plan_submission.py"`
-- `deliver: "slack:C0AUJ44J97W"`
+- `deliver: "slack:D0AS5H0LK70:1779144686.934649"`
 - `model: {"provider":"copilot","model":"gpt-5.4"}`
 
 Example for 20:00:
@@ -252,7 +258,7 @@ Example for 20:00:
   "action": "create",
   "name": "learning-plan-reminder-2000",
   "schedule": "0 20 * * 6",
-  "deliver": "slack:C0AUJ44J97W",
+  "deliver": "slack:D0AS5H0LK70:1779144686.934649",
   "model": {"provider": "copilot", "model": "gpt-5.4"},
   "script": "check_learning_plan_submission.py",
   "prompt": "你正在执行周六晚间学习规划提醒。先读取预运行脚本注入的上下文，再遵循 /opt/data/home/daily_ai_papers/docs/assistant-prompts/jerome-academic-coach.md 的 Gordon 风格。如果上下文里显示 PLAN_RECEIVED=true，则只输出：Gordon 收到啦，本周学习规划已记下，今晚不再提醒。 如果 PLAN_RECEIVED=false，则只输出：Gordon 来提醒一下：如果下周学习规划还没写，可以先回这 3 个小问题：1. 下周最想补哪一科？2. 最容易卡住的题型是什么？3. 每天准备学多久？写几行发来就可以。"
@@ -278,7 +284,7 @@ Use corresponding names:
 ## Slack delivery notes
 
 Current delivery target for all active jobs:
-- `slack:C0AUJ44J97W`
+- `slack:D0AS5H0LK70:1779144686.934649`
 
 If delivery fails with `channel_not_found` or `not_in_channel`:
 - verify the bot is actually in the channel
