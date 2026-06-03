@@ -8,8 +8,8 @@ Structure
 - docs/assistant-prompts/: versioned prompt files for assistant workflows
 
 Latest
-- news/2026/06/2026-06-02.md
-- papers/2026/06/2026-06-02.md
+- news/2026/06/2026-06-03.md
+- papers/2026/06/2026-06-03.md
 
 Task description
 
